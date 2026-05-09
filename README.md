@@ -61,7 +61,7 @@ Aplikasi web untuk manajemen tiket support internal perusahaan. Dibangun dengan 
 ## 🚀 Instalasi
 
 ### 1. Clone Repository
-```bash
+
 git clone https://github.com/username/helpdesk-ticketing.git
 cd helpdesk-ticketing
 ### 2. Install Dependencies PHP
