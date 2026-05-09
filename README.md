@@ -1,2 +1,191 @@
 # helpdesk-ticketing
 Aplikasi web untuk manajemen tiket support internal perusahaan. Dibangun dengan **Laravel 12** dan **PostgreSQL**.
+# 🎫 Helpdesk Ticketing System
+
+Aplikasi web untuk manajemen tiket support internal perusahaan. Dibangun dengan **Laravel 12** dan **PostgreSQL**.
+
+---
+
+## 📋 Daftar Isi
+
+- [Fitur](#fitur)
+- [Teknologi](#teknologi)
+- [Instalasi](#instalasi)
+- [Konfigurasi Database](#konfigurasi-database-postgresql)
+- [Menjalankan Aplikasi](#menjalankan-aplikasi)
+- [Akun Default](#akun-default)
+- [Cara Menggunakan](#cara-menggunakan)
+- [Struktur Database](#struktur-database)
+- [Troubleshooting](#troubleshooting)
+- [Lisensi](#lisensi)
+
+---
+
+## ✨ Fitur
+
+### 👤 User (Employee)
+- Membuat tiket baru dengan **nomor unik otomatis** (format: `TCK-YYYYMMDD-XXXX`)
+- Status awal tiket: **Open**
+- Melihat daftar tiket milik sendiri
+- Melihat detail tiket dan **history log** lengkap
+
+### 🛠️ IT Support
+- Melihat **semua tiket** dengan filter:
+  - Status (`Open`, `On Progress`, `Resolved`, `Closed`)
+  - Tanggal dibuat (dari – sampai)
+  - Kategori
+  - Prioritas (`Low`, `Medium`, `High`)
+- Mengubah status tiket sesuai workflow:
+
+  - Memberikan **catatan** setiap kali mengubah status
+- Menambah catatan tambahan dan **lampiran file** (max 5MB)
+
+### 📜 Ticket History (Log)
+- Setiap perubahan (status update, catatan, upload file) tercatat di tabel `ticket_logs`
+- History menampilkan waktu, user, aksi, dan detail perubahan
+
+---
+
+## 🧰 Teknologi
+
+| Komponen | Versi / Nama |
+|----------|--------------|
+| PHP | 8.2+ |
+| Laravel | 12.x |
+| Database | PostgreSQL 14+ |
+| Frontend | Bootstrap 5 (CDN) |
+| Templating | Blade |
+
+---
+
+## 🚀 Instalasi
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/username/helpdesk-ticketing.git
+cd helpdesk-ticketing
+### 2. Install Dependencies PHP
+composer install
+### 3. Environment Configuration
+# Windows
+copy .env.example .env
+
+# Linux / Mac
+cp .env.example .env
+php artisan key:generate
+
+### 4. Konfigurasi Database (PostgreSQL)
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=helpdesk_db
+DB_USERNAME=postgres
+DB_PASSWORD=password_anda
+
+SESSION_DRIVER=file
+Catatan: Pastikan database helpdesk_db sudah dibuat di PostgreSQL.
+Jika belum, buka psql atau pgAdmin dan jalankan:
+CREATE DATABASE helpdesk_db;
+
+### 5. Jalankan Migrasi & Seeder
+php artisan migrate --seed
+Seeder akan membuat:
+
+6 kategori: Hardware, Software, Network, Email, Access Rights, Other
+
+2 akun default: Employee dan IT Support
+
+### 6. Storage Link (untuk file upload)
+php artisan storage:link
+
+### 7. Jalankan Server
+php artisan serve
+
+## 🔐 Akun Default
+
+Setelah menjalankan seeder (`php artisan migrate --seed`), berikut adalah akun yang tersedia:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Employee** (User) | `employee@helpdesk.com` | `password123` |
+| **IT Support** | `support@helpdesk.com` | `password123` |
+
+> Pendaftaran akun baru melalui halaman `/register` akan menghasilkan user dengan role `employee` secara otomatis.
+
+---
+
+## 🗄️ Struktur Database Schema & Relasi Antar Tabel
+
+### Tabel `users`
+Menyimpan data pengguna (Employee dan IT Support).
+
+| Kolom | Tipe Data | Keterangan |
+|-------|-----------|-------------|
+| `id` | BIGINT (PK) | Auto increment, primary key |
+| `name` | VARCHAR(255) | Nama lengkap |
+| `email` | VARCHAR(255) | Unik, digunakan untuk login |
+| `password` | VARCHAR(255) | Hash bcrypt |
+| `role` | ENUM('employee','support') | Peran pengguna, default 'employee' |
+| `remember_token` | VARCHAR(100) | Token "remember me" |
+| `created_at` | TIMESTAMP | Waktu pembuatan |
+| `updated_at` | TIMESTAMP | Waktu update |
+
+### Tabel `categories`
+Menyimpan kategori tiket.
+
+| Kolom | Tipe Data | Keterangan |
+|-------|-----------|-------------|
+| `id` | BIGINT (PK) | Auto increment, primary key |
+| `name` | VARCHAR(255) | Nama kategori (Hardware, Software, dll) |
+| `slug` | VARCHAR(255) | URL friendly, unique |
+| `created_at` | TIMESTAMP | Waktu pembuatan |
+| `updated_at` | TIMESTAMP | Waktu update |
+
+### Tabel `tickets`
+Menyimpan data tiket.
+
+| Kolom | Tipe Data | Keterangan |
+|-------|-----------|-------------|
+| `id` | BIGINT (PK) | Auto increment, primary key |
+| `ticket_no` | VARCHAR(255) | Nomor tiket unik (TCK-YYYYMMDD-XXXX) |
+| `user_id` | BIGINT (FK) | ID pembuat tiket (relasi ke `users.id`) |
+| `category_id` | BIGINT (FK) | ID kategori (relasi ke `categories.id`) |
+| `subject` | VARCHAR(255) | Judul tiket |
+| `description` | TEXT | Deskripsi keluhan |
+| `status` | ENUM | `Open`, `On Progress`, `Resolved`, `Closed` – default `Open` |
+| `priority` | ENUM | `Low`, `Medium`, `High` – default `Medium` |
+| `created_at` | TIMESTAMP | Waktu pembuatan tiket |
+| `updated_at` | TIMESTAMP | Waktu update |
+
+### Tabel `ticket_logs`
+Menyimpan history log setiap perubahan pada tiket.
+
+| Kolom | Tipe Data | Keterangan |
+|-------|-----------|-------------|
+| `id` | BIGINT (PK) | Auto increment, primary key |
+| `ticket_id` | BIGINT (FK) | ID tiket yang terkait (relasi ke `tickets.id`) |
+| `user_id` | BIGINT (FK) | ID user yang melakukan perubahan (relasi ke `users.id`) |
+| `action` | VARCHAR(255) | Jenis aksi: `created`, `status_updated`, `note_added`, `file_uploaded` |
+| `old_status` | VARCHAR(255) | Status sebelum perubahan |
+| `new_status` | VARCHAR(255) | Status setelah perubahan |
+| `note` | TEXT | Catatan perubahan |
+| `attachment` | VARCHAR(255) | Path file lampiran |
+| `created_at` | TIMESTAMP | Waktu log |
+| `updated_at` | TIMESTAMP | Waktu update |
+
+### 🔗 Relasi Antar Tabel
+
+| Relasi | Jenis | Foreign Key | Penjelasan |
+|--------|-------|-------------|-------------|
+| `users` → `tickets` | **One to Many** | `tickets.user_id` → `users.id` | Satu user dapat membuat banyak tiket |
+| `categories` → `tickets` | **One to Many** | `tickets.category_id` → `categories.id` | Satu kategori dapat digunakan oleh banyak tiket |
+| `tickets` → `ticket_logs` | **One to Many** | `ticket_logs.ticket_id` → `tickets.id` | Satu tiket memiliki banyak history log |
+| `users` → `ticket_logs` | **One to Many** | `ticket_logs.user_id` → `users.id` | Satu user dapat membuat banyak log |
+
+### ⚙️ Constraint & Aturan
+
+- **CASCADE DELETE** pada `tickets.user_id` – jika user dihapus, semua tiket dan log-nya ikut terhapus
+- **RESTRICT DELETE** pada `tickets.category_id` – kategori tidak bisa dihapus jika masih ada tiket yang menggunakannya
+- **CASCADE DELETE** pada `ticket_logs.ticket_id` – jika tiket dihapus, semua history log-nya ikut terhapus
+- **CASCADE DELETE** pada `ticket_logs.user_id` – jika user dihapus, semua log yang dibuatnya ikut terhapus
+
