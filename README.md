@@ -81,19 +81,14 @@ DB_PORT=5432
 DB_DATABASE=helpdesk_db
 DB_USERNAME=postgres
 DB_PASSWORD=password_anda
-
 SESSION_DRIVER=file
+
 Catatan: Pastikan database helpdesk_db sudah dibuat di PostgreSQL.
 Jika belum, buka psql atau pgAdmin dan jalankan:
 CREATE DATABASE helpdesk_db;
 
 ### 5. Jalankan Migrasi & Seeder
 php artisan migrate --seed
-Seeder akan membuat:
-
-6 kategori: Hardware, Software, Network, Email, Access Rights, Other
-
-2 akun default: Employee dan IT Support
 
 ### 6. Storage Link (untuk file upload)
 php artisan storage:link
