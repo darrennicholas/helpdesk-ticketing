@@ -233,3 +233,83 @@ Menyimpan history log setiap perubahan pada tiket.
    - Klik **Add Note**
 
 6. Setiap perubahan akan langsung terekam di **History Log** pada bagian bawah halaman.
+
+## 📁 Migration Files
+
+Semua migration file dapat diakses di folder `database/migrations/`.  
+Berikut daftar file yang digunakan:
+
+| File | Fungsi |
+|------|--------|
+| `2025_01_01_000001_create_users_table.php` | Membuat tabel `users` |
+| `2025_01_01_000002_create_categories_table.php` | Membuat tabel `categories` |
+| `2025_01_01_000003_create_tickets_table.php` | Membuat tabel `tickets` |
+| `2025_01_01_000004_create_ticket_logs_table.php` | Membuat tabel `ticket_logs` |
+
+Untuk menjalankan migration (termasuk seeder):
+
+php artisan migrate --seed
+
+
+## 🔐 Dua Akun Default untuk Login Langsung
+
+Setelah menjalankan `php artisan migrate --seed`, tersedia dua akun yang dapat langsung digunakan:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Employee** (User) | `employee@helpdesk.com` | `password123` |
+| **IT Support** | `support@helpdesk.com` | `password123` |
+
+Cukup buka halaman `/login` dan masukkan kredensial di atas.
+
+---
+
+## 📝 Cara Register Akun Baru
+
+1. Kunjungi halaman `/register`.
+2. Isi formulir:
+   - `Name` – nama lengkap
+   - `Email` – alamat email unik
+   - `Password` – minimal 6 karakter
+   - `Confirm Password` – ulangi password
+3. Klik tombol **Register**.
+4. Setelah berhasil, Anda akan **otomatis login** dan diarahkan ke halaman `My Tickets` (daftar tiket milik Anda).
+
+---
+
+## ❗ Role yang Bisa Dipilih Saat Register
+
+**Tidak ada pilihan role.**  
+Setiap pendaftaran baru akan secara otomatis diberikan role **`employee`** (User biasa).
+
+---
+
+## 🔍 Mengapa Tidak Bisa Memilih Role & Langsung Menjadi User?
+
+Alasan keamanan dan segregasi akses:
+
+1. **Perbedaan hak akses**  
+   - `employee` hanya bisa membuat tiket, melihat tiket sendiri, dan melihat history-nya.  
+   - `support` memiliki akses penuh ke **semua tiket**, dapat mengubah status, menambahkan catatan, dan menggunakan filter.  
+   Memberikan opsi pilih role saat register akan memungkinkan siapa saja mendaftar sebagai `support` dan menyalahgunakan wewenang.
+
+2. **Prinsip least privilege**  
+   Setiap pengguna baru seharusnya hanya memiliki hak minimal yang diperlukan. Role `employee` adalah hak minimal untuk menggunakan sistem ticketing. Role `support` harus diberikan secara intentional oleh administrator (misal melalui database atau seeder).
+
+3. **Audit dan akuntabilitas**  
+   Menetapkan role `support` melalui jalur terkontrol (hanya admin/database) memudahkan pelacakan siapa yang memiliki akses istimewa.
+
+> 💡 Jika memang diperlukan akun support tambahan, dapat dibuat melalui **seeder** atau **Tinker**:
+> ```bash
+> php artisan tinker
+> ```
+> ```php
+> $user = new App\Models\User;
+> $user->name = 'Support Baru';
+> $user->email = 'support2@helpdesk.com';
+> $user->password = bcrypt('rahasia');
+> $user->role = 'support';
+> $user->save();
+> ```
+
+Dengan mekanisme ini, sistem tetap aman, akun baru otomatis menjadi user biasa, dan role support tetap eksklusif.
