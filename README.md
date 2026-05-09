@@ -62,7 +62,7 @@ Aplikasi web untuk manajemen tiket support internal perusahaan. Dibangun dengan 
 
 ### 1. Clone Repository
 
-git clone https://github.com/username/helpdesk-ticketing.git
+git clone https://github.com/darrennicholas/helpdesk-ticketing
 cd helpdesk-ticketing
 ### 2. Install Dependencies PHP
 composer install
@@ -189,3 +189,47 @@ Menyimpan history log setiap perubahan pada tiket.
 - **CASCADE DELETE** pada `ticket_logs.ticket_id` – jika tiket dihapus, semua history log-nya ikut terhapus
 - **CASCADE DELETE** pada `ticket_logs.user_id` – jika user dihapus, semua log yang dibuatnya ikut terhapus
 
+
+## 📖 Cara Menggunakan
+
+### 👤 Sebagai Employee
+
+1. **Login** dengan akun Employee (`employee@helpdesk.com` / `password123`).
+2. Pada navbar, klik **New Ticket**.
+3. Isi form tiket:
+   - Pilih **Kategori** (Hardware, Software, dll)
+   - Masukkan **Subjek** (judul keluhan)
+   - Tulis **Deskripsi** lengkap
+   - Pilih **Prioritas** (Low, Medium, High)
+   - (Opsional) Lampirkan file (max 5MB)
+4. Klik **Submit Ticket**.
+5. Tiket baru akan muncul di halaman **My Tickets** dengan status `Open`.
+6. Klik **View** untuk melihat detail tiket dan **History Log** perubahan.
+
+---
+
+### 🛠️ Sebagai IT Support
+
+1. **Login** dengan akun IT Support (`support@helpdesk.com` / `password123`).
+2. Buka menu **All Tickets**.
+3. Gunakan **filter** untuk mencari tiket yang diinginkan:
+   - Status (`Open`, `On Progress`, `Resolved`, `Closed`)
+   - Kategori
+   - Prioritas
+   - Rentang tanggal (Date From – Date To)
+4. Klik tombol **Process** pada tiket yang akan ditangani.
+5. Pada halaman detail tiket, tersedia dua aksi:
+
+   #### 🔄 Update Status
+   - Tombol akan menampilkan **status selanjutnya** sesuai workflow:
+     `Open → On Progress → Resolved → Closed`
+   - Tambahkan **catatan** (wajib untuk dokumentasi, misal: *"Sedang dicek ke user"*)
+   - (Opsional) Lampirkan file
+   - Klik **Update Status**
+
+   #### 📝 Add Note
+   - Tambahkan **catatan tambahan** tanpa mengubah status
+   - (Opsional) Lampirkan file
+   - Klik **Add Note**
+
+6. Setiap perubahan akan langsung terekam di **History Log** pada bagian bawah halaman.
